@@ -1,25 +1,48 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import keras
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D , MaxPool2D , Flatten , Dropout 
 from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import adam_v2
 
-datagen = ImageDataGenerator(
-        rotation_range=40,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True,
-        fill_mode='nearest')
+from sklearn.metrics import classification_report,confusion_matrix
 
+import tensorflow as tf
 
-img = load_img('./data/bar_chart/bar_chart_1.jpeg')  # this is a PIL image
-x = img_to_array(img)  # this is a Numpy array with shape (3, 150, 150)
-x = x.reshape((1,) + x.shape)  # this is a Numpy array with shape (1, 3, 150, 150)
+import cv2
+import os
 
-# the .flow() command below generates batches of randomly transformed images
-# and saves the results to the `preview/` directory
-i = 0
-for batch in datagen.flow(x, batch_size=1,
-                          save_to_dir='preview', save_prefix='cat', save_format='jpeg'):
-    i += 1
-    if i > 20:
-        break  # otherwise the generator would loop indefinitely
+import numpy as np
+
+labels = ['bar chart', 'line chart', 'pie chart','scatter plot']
+img_size = 224
+
+def get_data(data_dir):
+    data = [] 
+    for label in labels: 
+        path = os.path.join(data_dir, label)
+        print(path)
+        class_num = labels.index(label)
+        for img in os.listdir(path):
+            try:
+                img_arr = cv2.imread(os.path.join(path, img))[...,::-1] #convert BGR to RGB format
+                resized_arr = cv2.resize(img_arr, (img_size, img_size)) # Reshaping images to preferred size
+                data.append([resized_arr, class_num])
+            except Exception as e:
+                print(e)
+    return np.array(data)
+
+train = get_data('./data/all')
+
+#     if(i[1] == b):
+#         l.append("bar_chart")
+#     elif(i[1] == s):
+#         l.append("scatter_plot")
+#     elif(i[1] == p):
+#         l.append("pie_chart")
+#     elif(i[1] == l):
+#         l.append("line_graph")
+# sns.set_style('darkgrid')
+# sns.countplot(l)
