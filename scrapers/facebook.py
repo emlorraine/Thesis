@@ -9,3 +9,4 @@ def scrape():
 
 scrape()
 print(image_urls)
+
