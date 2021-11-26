@@ -4,6 +4,7 @@ import time
 import re 
 import requests
 import datetime
+import os 
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -13,21 +14,23 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 
-BASE_URL = "https://www.washingtonpost.com/graphics/2018/politics/whos-getting-outspent/?utm_term=.793f3c3d43a5"
+BASE_URL = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
 
 
 
 def file_name(link: str):
     raw_company = link.split("www.")
     date = datetime.datetime.now().strftime("%m/%d/%y")
-    filename = date +  "_" + raw_company[1] + ".txt"
-    return filename
+    filename = date +  "_" + raw_company[1]
+    final = filename.replace(".html", "")
+    final = filename.replace("/", "-")
+    return final
 
 def write_text(data: str, path: str, filename: str):
-    print(type(data))
-    f = open(filename, "x")
-    with open(f, 'x') as file:
-        file.write(data)
+    print("%s.svg" % filename)
+    data_bytes = data.encode(encoding='UTF-8')
+    with open("%s.svg" % filename, "wb") as f:
+        f.write(data_bytes)
 
 def inspect(link: str):
     driver = webdriver.Chrome(ChromeDriverManager().install())
