@@ -29,7 +29,7 @@ def file_name(link: str):
 def write_text(data: str, path: str, filename: str):
     print("%s.svg" % filename)
     data_bytes = data.encode(encoding='UTF-8')
-    with open("%s.svg" % filename, "wb") as f:
+    with open("../data/%s.svg" % filename, "wb") as f:
         f.write(data_bytes)
 
 def inspect(link: str):
