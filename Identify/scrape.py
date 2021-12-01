@@ -12,9 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-from drawBot import * 
-
-
 
 BASE_URL = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
 
@@ -27,12 +24,6 @@ def file_name(link: str):
     final = filename.replace(".html", "")
     final = filename.replace("/", "-")
     return final
-
-def convert_to_png(data: str):
-    newDrawing()  
-    
-    endDrawing()                
-
 
 
 def write_text(data: str, path: str, filename: str):
@@ -60,4 +51,4 @@ def inspect(link: str):
     driver.close()
 
 
-inspect(BASE_URL)
+# inspect(BASE_URL)

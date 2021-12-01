@@ -1,5 +1,23 @@
 from PIL import Image
 import numpy as np
+import os 
+import pyvips
+
+
+def save_as_png():
+    image = pyvips.Image.new_from_file("11-27-21_cnn.com-interactive-2019-business-us-minimum-wage-by-year-index.html.svg", dpi=300)
+    image.write_to_file("img.png")
+
+    
+
+def find_data():
+    if not os.listdir('../data/new'):
+        print("Directory is empty")
+        cairosvg.svg2png(url="../data/new/11-27-21_cnn.com-interactive-2019-business-us-minimum-wage-by-year-index.html.svg", write_to="../data/pngs/output.png")
+        # convertToBitMap("../data/new/11-27-21_cnn.com-interactive-2019-business-us-minimum-wage-by-year-index.html")
+    else:    
+        print("Directory is not empty")
+
 
 def convertToBitMap(fileName):
     img = Image.open(fileName)
@@ -18,4 +36,4 @@ def convertToBitMap(fileName):
     bitMapImageName = fileName[0:(len(fileName)-4)] + "BitMap.bmp"
     im.save("output/"+bitMapImageName)
 
-convertToBitMap("tree.jpg")
+save_as_png()
