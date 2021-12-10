@@ -1,5 +1,10 @@
 from facebook_scraper import get_posts
 from datetime import datetime
+import gspread
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
+
+from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 def scrape():
     sources = [
