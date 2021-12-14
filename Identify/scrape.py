@@ -6,6 +6,8 @@ import requests
 import datetime
 import os 
 
+from retrieve import pull_reddit_data, pull_facebook_data
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,8 +16,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 BASE_URL = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
-
-
 
 def file_name(link: str):
     raw_company = link.split("www.")
@@ -27,8 +27,6 @@ def file_name(link: str):
 
 
 def write_text(data: str, path: str, filename: str):
-
-
     print("%s.svg" % filename)
     data_bytes = data.encode(encoding='UTF-8')
     with open("../data/%s.svg" % filename, "wb") as f:

@@ -2,6 +2,9 @@ import gspread
 from gspread_dataframe import get_as_dataframe
 
 
+def wft():
+    return 4*4
+
 def pull_reddit_data():
     data = []
     credentials = {
@@ -42,5 +45,4 @@ def pull_facebook_data():
     for wk in sh:
         wh_data = wk.get_all_records()
         data.append(wh_data)
-
-    return data 
+    return data
