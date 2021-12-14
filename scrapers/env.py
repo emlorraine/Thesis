@@ -1,0 +1,1 @@
+#here we need to make an env file for python scrapers
