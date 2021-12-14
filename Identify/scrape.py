@@ -49,7 +49,6 @@ def inspect():
     data = get_data()
     for url_entry in data:
         #ALL MUST BE IN LOOP:
-
         op = webdriver.ChromeOptions()
         op.add_argument('headless')        
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
