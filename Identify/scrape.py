@@ -48,7 +48,11 @@ def write_text(data: str, path: str, filename: str):
 def inspect():
     data = get_data()
     for url_entry in data:
-        driver = webdriver.Chrome(ChromeDriverManager().install())
+        #ALL MUST BE IN LOOP:
+
+        op = webdriver.ChromeOptions()
+        op.add_argument('headless')        
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
         driver.implicitly_wait(10)
         driver.get(url_entry)
         driver.refresh()
