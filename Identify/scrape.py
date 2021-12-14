@@ -17,6 +17,19 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 BASE_URL = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
 
+def get_data():
+    data = []
+    facebook_data = pull_facebook_data()
+    reddit_data = pull_reddit_data()
+    for sheet in reddit_data:
+        for entries in sheet:
+            data.append(entries["Post URL"])
+    for sheet in facebook_data:
+        for entries in sheet:
+            data.append(entries["Post URL"])
+    return data
+  
+
 def file_name(link: str):
     raw_company = link.split("www.")
     date = datetime.datetime.now().strftime("%m/%d/%y")
@@ -32,21 +45,23 @@ def write_text(data: str, path: str, filename: str):
     with open("../data/%s.svg" % filename, "wb") as f:
         f.write(data_bytes)
 
-def inspect(link: str):
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-    driver.implicitly_wait(10)
-    driver.get(BASE_URL)
-    driver.refresh()
-    contents = driver.page_source
-    start = contents.find("<svg")
-    end = contents.find("</svg>")
-    print ("Substring found at indexes:", start, end)
-    if(start is not "-1" and end is not "-1"):
-        svg = contents[int(start):(int(end)+6)]
-        filename = file_name(link)
-        path = ""
-        write_text(svg, path, filename)
-    driver.close()
+def inspect():
+    data = get_data()
+    for url_entry in data:
+        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver.implicitly_wait(10)
+        driver.get(url_entry)
+        driver.refresh()
+        contents = driver.page_source
+        start = contents.find("<svg")
+        end = contents.find("</svg>")
+        print ("Substring found at indexes:", start, end)
+        if(start is not "-1" and end is not "-1"):
+            svg = contents[int(start):(int(end)+6)]
+            filename = file_name(url_entry)
+            path = ""
+            write_text(svg, path, filename)
+        driver.close()
 
 
-# inspect(BASE_URL)
+inspect()
