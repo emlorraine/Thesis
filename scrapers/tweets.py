@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from pandas.core.frame import DataFrame
 from twitter import *
 import pandas as pd
 
@@ -57,10 +58,12 @@ def scrape():
                 posts_dict["Total Comments"].append(entries['retweet_count'])
                 posts_dict["Likes"].append(entries['favorite_count'])
                 posts_dict["Post URL"].append(link)
-        update(posts_dict)
+    update(posts_dict)
 
 
 def update(df):
+    data = pd.DataFrame(df)
+    print(data)
     credentials = {
         "type": "service_account",
         "project_id": "reddit-334418",
@@ -76,8 +79,8 @@ def update(df):
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("tweets")
     date_string = datetime.now().strftime("%m/%d/%y")
-    worksheet = sh.add_worksheet(title=date_string, rows="1700", cols="15")
-    set_with_dataframe(worksheet, df)
+    wk = sh.add_worksheet(title=date_string, rows="1700", cols="15")
+    set_with_dataframe(wk, data)
 
 scrape()
 

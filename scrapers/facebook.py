@@ -1,5 +1,6 @@
 from facebook_scraper import get_posts
 from datetime import datetime
+from backports.zoneinfo import ZoneInfo
 import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
 
@@ -25,11 +26,13 @@ def scrape():
         "time"
     ]
     posts_dict = {"Date": [], "Page": [], "Title": [], "Post Text": [], "ID": [], "Total Comments": [], "Post URL": []}
+    STL = ZoneInfo("America/Chicago")
+    date = datetime.today()
 
     for source in sources: 
         for post in get_posts(source, pages=100):
             if(post['link']):
-                posts_dict["Date"].append(datetime.now().strftime('%Y-%m-%d'))
+                posts_dict["Date"].append(date)
                 posts_dict["Page"].append(source)
                 posts_dict["Title"].append(post['text'])
                 posts_dict["Post Text"].append(post['post_text'])
