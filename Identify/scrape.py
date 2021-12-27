@@ -64,8 +64,8 @@ def push_to_svg_sheet(df):
     } 
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("svg_data")
-    date_string = datetime.now().strftime("%m/%d/%y")
-    worksheet = sh.add_worksheet(title=date_string, rows="1700", cols="15")
+    # date_string = datetime.now().strftime("%m/%d/%y")
+    worksheet = sh.add_worksheet(title="data", rows="1700", cols="15")
     set_with_dataframe(worksheet, df)
 
 
@@ -93,16 +93,15 @@ def inspect():
             #THIS IS USEFUL. THIS IS HOW WE GET THE SVG AND SAVE IT LOCALLY
             #WE CAN LEVERAGE THE INDEX OF THE SHEET TO CONNECT THE POST TO THE DENSITY SCORE
 
-            # push_to_svg_sheet()
             # svg = contents[int(start):(int(end)+6)]
             # filename = file_name(url_entry)
             # path = ""
             # write_text(svg, path, filename)
 
-            
-        driver.close()
 
-        push_to_svg_sheet(svg_data)
+        driver.close()
+        print(svg_data)
+        # push_to_svg_sheet(svg_data)
 
 
 #We need to find a way to connect data details to their data entry
