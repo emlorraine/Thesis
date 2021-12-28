@@ -31,38 +31,75 @@ subreddits = [
     "LibertarianLeft"
 ]
 
+
+
+november_dates = [
+    "2021-11-03",
+    "2021-11-04",
+    "2021-11-05",
+    "2021-11-06",
+    "2021-11-07",
+    "2021-11-08",
+    "2021-11-09",
+    "2021-11-10",
+    "2021-11-11",
+    "2021-11-12",
+    "2021-11-13",
+    "2021-11-14",
+    "2021-11-15",
+    "2021-11-16",
+    "2021-11-17",
+    "2021-11-18",
+    "2021-11-19",
+    "2021-11-20",
+    "2021-11-21",
+    "2021-11-22",
+    "2021-11-23",
+    "2021-11-24",
+    "2021-11-25",
+    "2021-11-26",
+    "2021-11-27",
+    "2021-11-28",
+    "2021-11-29",
+    "2021-11-30",
+]
+
 def scrape():
-    posts_dict = {"Date": [], "Subreddit": [], "Title": [], "Post Text": [], "ID": [], "Score": [], "Total Comments": [], "Post URL": []}
+    # posts_dict = {"Date": [], "Subreddit": [], "Title": [], "Post Text": [], "ID": [], "Score": [], "Total Comments": [], "Post URL": []}
     id = "ROpOaQiBgUAsLw"
     key = "xQkoVMppm1pDAFJrNo2Dgr33ItW1yA"
     agent = "viz_scraper"
 
     reddit = praw.Reddit(client_id=id, client_secret=key, user_agent=agent)
 
-    for subreddit in subreddits:
-        for submission in reddit.subreddit(subreddit).hot(limit=100):
-            if(submission.url):
-                posts_dict["Date"].append(datetime.today().strftime('%Y-%m-%d'))
-                posts_dict["Subreddit"].append(subreddit)
-                post_title = submission.title[0:500]
-                if(len(post_title)>1000):
-                    print(post_title)
+    for date in november_dates:
+        posts_dict = {"Date": [], "Subreddit": [], "Title": [], "Post Text": [], "ID": [], "Score": [], "Total Comments": [], "Post URL": []}
+        for subreddit in subreddits:
+            for submission in reddit.subreddit(subreddit).hot(limit=100):
+                dt = datetime.fromtimestamp(submission.created_utc)
+                dt_string = str(dt)
+                if(submission.url and (date in dt_string)):
+                    # posts_dict["Date"].append(datetime.today().strftime('%Y-%m-%d'))
+                    posts_dict["Date"].append(dt_string)
+                    posts_dict["Subreddit"].append(subreddit)
+                    post_title = submission.title[0:500]
+                    if(len(post_title)>1000):
+                        print(post_title)
+                    posts_dict["Title"].append(post_title)
+                    post_text = submission.selftext[0:500]
+                    if(len(post_text)>1000):
+                        print(post_text)
+                    posts_dict["Post Text"].append(post_text)
+                    posts_dict["ID"].append(submission.id)
+                    posts_dict["Score"].append(submission.score)
+                    posts_dict["Total Comments"].append(submission.num_comments)
+                    posts_dict["Post URL"].append(submission.url)
                 
-                posts_dict["Title"].append(post_title)
-                post_text = submission.selftext[0:500]
-                if(len(post_text)>1000):
-                    print(post_text)
-                posts_dict["Post Text"].append(post_text)
-                posts_dict["ID"].append(submission.id)
-                posts_dict["Score"].append(submission.score)
-                posts_dict["Total Comments"].append(submission.num_comments)
-                posts_dict["Post URL"].append(submission.url)
-                
-    
-    posts = pd.DataFrame(posts_dict)
-    update(posts); 
 
-def update(df):
+        posts = pd.DataFrame(posts_dict)
+        update(posts, date); 
+
+def update(df, dt_string):
     credentials = {
         "type": "service_account",
         "project_id": "reddit-334418",
@@ -77,9 +114,10 @@ def update(df):
     } 
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("reddit")
-    date_string = datetime.now().strftime("%m/%d/%y")
-    worksheet = sh.add_worksheet(title=date_string, rows="1700", cols="15")
+    worksheet = sh.add_worksheet(title=dt_string, rows="1700", cols="15")
     set_with_dataframe(worksheet, df)
+    print("Writing", dt_string, "to data.")
+
 
 scrape()
 
