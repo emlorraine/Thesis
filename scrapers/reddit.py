@@ -109,8 +109,8 @@ def scrape():
             # all_data = all_data + posts
         # print("In total there are", len(all_data), "posts.")
         # df = pd.DataFrame(all_data, columns=['Output', 'temp'])
-        # update(df, date[0:10])
-        print(posts_dict)
+        update(posts_dict, date[0:10])
+        # print(posts_dict)
 
 
 
@@ -147,9 +147,7 @@ def scrape():
         # update(posts, date); 
 
 def update(df, dt_string):
-    print(df)
-    print(type(df))
-
+    data = pd.DataFrame(df)
     credentials = {
         "type": "service_account",
         "project_id": "reddit-334418",
@@ -164,8 +162,8 @@ def update(df, dt_string):
     } 
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("reddit_test")
-    worksheet = sh.add_worksheet(title=dt_string, rows="1700", cols="15")
-    # set_with_dataframe(worksheet, df)
+    wk = sh.add_worksheet(title=dt_string, rows="1700", cols="15")
+    set_with_dataframe(wk, data)
     print("Writing", dt_string, "to data.")
 
 
