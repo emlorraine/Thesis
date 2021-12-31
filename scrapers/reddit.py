@@ -36,40 +36,7 @@ subreddits = [
 
 
 dates = [
-    '2021-11-01 00:00:00.000000',
-    # '2021-11-02 00:00:00.000000',
-    # '2021-11-03 00:00:00.000000',
-    # "2021-10-01 00:00:00.000000",
-    # "2021-10-02 00:00:00.000000",
-    # "2021-10-03 00:00:00.000000",
-    # "2021-10-04 00:00:00.000000",
-    # "2021-10-05 00:00:00.000000",
-    # "2021-10-06 00:00:00.000000",
-    # "2021-10-07 00:00:00.000000",
-    # "2021-10-08 00:00:00.000000",
-    # "2021-10-09 00:00:00.000000",
-    # "2021-10-10 00:00:00.000000",
-    # "2021-10-11 00:00:00.000000",
-    # "2021-10-12 00:00:00.000000",
-    # "2021-10-13 00:00:00.000000",
-    # "2021-10-14 00:00:00.000000",
-    # "2021-10-15 00:00:00.000000",
-    # "2021-10-16 00:00:00.000000",
-    # "2021-10-17 00:00:00.000000",
-    # "2021-10-18 00:00:00.000000",
-    # "2021-10-19 00:00:00.000000",
-    # "2021-10-20 00:00:00.000000",
-    # "2021-10-21 00:00:00.000000",
-    # "2021-10-22 00:00:00.000000",
-    # "2021-10-23 00:00:00.000000",
-    # "2021-10-24 00:00:00.000000",
-    # "2021-10-25 00:00:00.000000",
-    # "2021-10-26 00:00:00.000000",
-    # "2021-10-27 00:00:00.000000",
-    # "2021-10-28 00:00:00.000000",
-    # "2021-10-29 00:00:00.000000",
-    # "2021-10-30 00:00:00.000000",
-    # "2021-10-31 00:00:00.000000",
+    # Style dates to iterate over in the style of: "2021-12-01 00:00:00.000000"
 ]
 
 def scrape():
@@ -84,8 +51,6 @@ def scrape():
 
     for date in dates:
         posts_dict = {"Date": [], "Subreddit": [], "Title": [], "Post Text": [], "ID": [], "Score": [], "Total Comments": [], "Post URL": []}
-        # data = pd.DataFrame()
-        all_data = []
         start_date_time_obj = datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
         end_date_time_obj = start_date_time_obj+timedelta(days=1)
         for subreddit in subreddits:
@@ -104,47 +69,8 @@ def scrape():
                     posts_dict["Score"].append(post.score)
                     posts_dict["Total Comments"].append(post.num_comments)
                     posts_dict["Post URL"].append(post.url)
-            # print("At subreddt", subreddit, "there are", len(posts), "posts.")
-            # df = pd.DataFrame([obj.d_ for obj in posts])
-            # all_data = all_data + posts
-        # print("In total there are", len(all_data), "posts.")
-        # df = pd.DataFrame(all_data, columns=['Output', 'temp'])
         update(posts_dict, date[0:10])
-        # print(posts_dict)
 
-
-
-    
-
-    # for date in dates:
-    #     print("checking for:", date)
-    #     posts_dict = {"Date": [], "Subreddit": [], "Title": [], "Post Text": [], "ID": [], "Score": [], "Total Comments": [], "Post URL": []}
-    #     for subreddit in subreddits:
-    #         for submission in reddit.subreddit(subreddit).new(limit=None):
-    #             dt = datetime.fromtimestamp(submission.created_utc)
-    #             dt_string = str(dt)
-    #             if(submission.url and (date in dt_string)):
-    #                 print("Date:", date, "found in", dt_string)
-    #                 print("found", submission.title, "in subreddit:", subreddit)
-                    # posts_dict["Date"].append(datetime.today().strftime('%Y-%m-%d'))
-                    # posts_dict["Date"].append(dt_string)
-                    # posts_dict["Subreddit"].append(subreddit)
-                    # post_title = submission.title[0:500]
-                    # if(len(post_title)>1000):
-                    #     print(post_title)
-                    # posts_dict["Title"].append(post_title)
-                    # post_text = submission.selftext[0:500]
-                    # if(len(post_text)>1000):
-                    #     print(post_text)
-                    # posts_dict["Post Text"].append(post_text)
-                    # posts_dict["ID"].append(submission.id)
-                    # posts_dict["Score"].append(submission.score)
-                    # posts_dict["Total Comments"].append(submission.num_comments)
-                    # posts_dict["Post URL"].append(submission.url)
-                
-
-        # posts = pd.DataFrame(posts_dict)
-        # update(posts, date); 
 
 def update(df, dt_string):
     data = pd.DataFrame(df)
@@ -161,7 +87,7 @@ def update(df, dt_string):
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("reddit_test")
+    sh = gc.open("reddit_december")
     wk = sh.add_worksheet(title=dt_string, rows="1700", cols="15")
     set_with_dataframe(wk, data)
     print("Writing", dt_string, "to data.")
