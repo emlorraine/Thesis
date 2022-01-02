@@ -19,7 +19,7 @@ def pull_reddit_data():
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("reddit")
+    sh = gc.open("reddit_test")
     for wk in sh:
         wh_data = wk.get_all_records()
         data.append(wh_data)

@@ -19,18 +19,18 @@ from gspread_dataframe import get_as_dataframe, set_with_dataframe
 
 def get_data():
     data = []
-    facebook_data = pull_facebook_data()
+    # facebook_data = pull_facebook_data()
     reddit_data = pull_reddit_data()
-    twitter_data = pull_twitter_data()
+    # twitter_data = pull_twitter_data()
     for sheet in reddit_data:
         for entries in sheet:
             data.append(entries)
-    for sheet in facebook_data:
-        for entries in sheet:
-            data.append(entries)
-    for sheet in twitter_data:
-        for entries in sheet:
-            data.append(entries)
+    # for sheet in facebook_data:
+    #     for entries in sheet:
+    #         data.append(entries)
+    # for sheet in twitter_data:
+    #     for entries in sheet:
+    #         data.append(entries)
     return data
   
 
@@ -77,18 +77,37 @@ def inspect():
     for entry in data:
         url_entry = entry['Post URL']
         #ALL MUST BE IN LOOP:
-        op = webdriver.ChromeOptions()
-        op.add_argument('headless')        
-        driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
-        driver.implicitly_wait(10)
-        driver.get(url_entry)
-        driver.refresh()
-        contents = driver.page_source
-        start = contents.find("<svg")
-        end = contents.find("</svg>")
-        print ("Substring found at indexes:", start, end)
-        if(start is not "-1" and end is not "-1"):
-            svg_data.append(entry)
+        if url_entry:
+            try:
+                op = webdriver.ChromeOptions()
+                op.add_argument('headless')        
+                driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
+                driver.implicitly_wait(10)
+                driver.get(url_entry)
+                driver.refresh()
+                contents = driver.page_source
+                start = contents.find("<svg")
+                end = contents.find("</svg>")
+                svg_string = contents[start:end]
+                g_start = svg_string.find("<g")
+                g_end = svg_string.find("</g")
+                # print(svg_string)
+                # if(start is not "-1" and end is not "-1"):
+                    # svg_data.append(entry)
+                if(g_start is not -1 or "-1" and g_end is not -1 or "-1"):
+                    g_string = svg_string[g_start:g_end]
+                    print (g_string, "found at indexes:", start, end, "at url", url_entry)
+
+                driver.close()
+            except (RuntimeError, TypeError, NameError):
+                print("Something went wrong when opening this url")
+                continue
+        else:
+            continue
+
+
+
+
 
             #THIS IS USEFUL. THIS IS HOW WE GET THE SVG AND SAVE IT LOCALLY
             #WE CAN LEVERAGE THE INDEX OF THE SHEET TO CONNECT THE POST TO THE DENSITY SCORE
@@ -99,9 +118,8 @@ def inspect():
             # write_text(svg, path, filename)
 
 
-        driver.close()
-        print(svg_data)
-        # push_to_svg_sheet(svg_data)
+    print(svg_data)
+    # push_to_svg_sheet(svg_data)
 
 
 #We need to find a way to connect data details to their data entry
