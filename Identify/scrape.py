@@ -82,12 +82,13 @@ def open_url(url_entry):
         driver.get(url_entry)
         driver.refresh()
 
-        custom_strainer = SoupStrainer(["svg","g"])
-        page_soup = BS(driver.page_source, 'html.parser', parse_only=custom_strainer)
+        key_words = ['chart', 'charts', 'viz', 'visualization','visualizations', 'graph', 'graphs']
+        
+        if any(key in driver.page_source for key in key_words):
+            custom_strainer = SoupStrainer(["svg","g"])
+            page_soup = BS(driver.page_source, 'html.parser', parse_only=custom_strainer)
+            print(url_entry)
 
-        if(page_soup):
-            return page_soup
-            # driver.close()
     except (RuntimeError, TypeError, NameError):
         print("Something went wrong when opening this url", url_entry)
         
@@ -99,13 +100,11 @@ def inspect():
     svg_data = []
     data = get_data()
     for entry in data:
-        
         url_entry = entry['Post URL']
         if url_entry:
             contents = open_url(url_entry)
             if(contents is not None):
                 svg_data.append(entry)
-
         else:
             continue
             #THIS IS USEFUL. THIS IS HOW WE GET THE SVG AND SAVE IT LOCALLY
@@ -125,4 +124,5 @@ def inspect():
 #I think instead of saving svgs immediately we need to push everything into a sheet that has useful data 
 #Therefore instead of saving as svgs immediately we should write data struct details to sheet and read/save urls from there
 
-inspect()
+# inspect()
+open_url("https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html")

@@ -9,6 +9,7 @@ import requests
 import datetime
 import os 
 
+from multiprocessing import Pool 
 import threading
 from multiprocessing.pool import ThreadPool
 
@@ -39,49 +40,53 @@ def get_data():
     #         data.append(entries)
     return data
 
-svg_data = []
-def open_url(entry):
-    url_entry = entry['Post URL']
-    print("Trying to open", url_entry)
-    if(url_entry):
-        try:
-            op = webdriver.ChromeOptions()
-            op.add_argument('headless')        
-            driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
-            driver.implicitly_wait(10)
-            driver.get(url_entry)
-            driver.refresh()
+# svg_data = []
+# def open_url(entry):
+#     url_entry = entry['Post URL']
+#     print("Trying to open", url_entry)
+#     if(url_entry):
+#         # try:
+#             op = webdriver.ChromeOptions()
+#             op.add_argument('headless')        
+#             driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
+#             driver.implicitly_wait(10)
+#             driver.get(url_entry)
+#             driver.refresh()
 
-            custom_strainer = SoupStrainer(["svg","g"])
-            page_soup = BS(driver.page_source, 'html.parser', parse_only=custom_strainer)
+#             try:
+#                 custom_strainer = SoupStrainer(["svg","g"])
+#                 page_soup = BS(driver.page_source, 'html.parser', parse_only=custom_strainer)
 
-            if(page_soup is not None):
-                svg_data.append(entry)
-                return page_soup
-                # driver.close()
-        except (RuntimeError, TypeError, NameError):
-            print("Something went wrong when opening this url", url_entry)
+#                 if(page_soup is not None):
+#                     svg_data.append(entry)
+#                     return page_soup
+#             except (RuntimeError, TypeError, NameError):
+#                     print("Error with", url_entry)
+                    # driver.close()
+        # except (RuntimeError, TypeError, NameError):
+        #     print("Something went wrong when opening this url", url_entry)
 
     
 
-def thread_task(lock,data_set):
-    lock.acquire()
-    open_url(entry)
-    lock.release()
+# def thread_task(lock,data_set):
+#     lock.acquire()
+#     open_url(entry)
+#     lock.release()
 
-if __name__ == "__main__":
-    start = time.time()
+# if __name__ == "__main__":
+#     start = time.time()
 
-    entries = get_data()
-    # guess a thread pool size which is a tradeoff of number of cpu cores,
-    # expected wait time for i/o and memory size.
+#     entries = get_data()
+#     # guess a thread pool size which is a tradeoff of number of cpu cores,
+#     # expected wait time for i/o and memory size.
+#     pool = Pool[2]
+#     results = pool.map(open_url(entry), entries)
 
-    with ThreadPool(100) as pool:
-        pool.map(open_url, entries, chunksize=1)
-    print("Elapsed Time: %s" % (time.time() - start))
+#     # with ThreadPool(50) as pool:
+#     #     pool.map(open_url, entries, chunksize=1)
+#     print("Elapsed Time: %s" % (time.time() - start))
 
 
-print("Final data", svg_data)
 
 
 
@@ -110,3 +115,5 @@ print("Final data", svg_data)
 
     # print(svg_data)
     # push_to_svg_sheet(svg_data)
+
+
