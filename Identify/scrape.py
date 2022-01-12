@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup as BS
+from bs4 import SoupStrainer
+
 import urllib.request
+from urllib.request import urlopen as request
 import time
 import re 
 import requests
@@ -13,6 +16,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+
+from joblib import Parallel, delayed
 
 import gspread
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
@@ -68,47 +73,41 @@ def push_to_svg_sheet(df):
     worksheet = sh.add_worksheet(title="data", rows="1700", cols="15")
     set_with_dataframe(worksheet, df)
 
+def open_url(url_entry):
+    try:
+        op = webdriver.ChromeOptions()
+        op.add_argument('headless')        
+        driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
+        driver.implicitly_wait(10)
+        driver.get(url_entry)
+        driver.refresh()
+
+        custom_strainer = SoupStrainer(["svg","g"])
+        page_soup = BS(driver.page_source, 'html.parser', parse_only=custom_strainer)
+
+        if(page_soup):
+            return page_soup
+            # driver.close()
+    except (RuntimeError, TypeError, NameError):
+        print("Something went wrong when opening this url", url_entry)
+        
+
+
 
 #This function pulls 
 def inspect():
     svg_data = []
     data = get_data()
-    # Loop over entire structure here instead
     for entry in data:
+        
         url_entry = entry['Post URL']
-        #ALL MUST BE IN LOOP:
         if url_entry:
-            try:
-                op = webdriver.ChromeOptions()
-                op.add_argument('headless')        
-                driver = webdriver.Chrome(ChromeDriverManager().install(), options=op)
-                driver.implicitly_wait(10)
-                driver.get(url_entry)
-                driver.refresh()
-                contents = driver.page_source
-                start = contents.find("<svg")
-                end = contents.find("</svg>")
-                svg_string = contents[start:end]
-                g_start = svg_string.find("<g")
-                g_end = svg_string.find("</g")
-                # print(svg_string)
-                # if(start is not "-1" and end is not "-1"):
-                    # svg_data.append(entry)
-                if(g_start is not -1 or "-1" and g_end is not -1 or "-1"):
-                    g_string = svg_string[g_start:g_end]
-                    print (g_string, "found at indexes:", start, end, "at url", url_entry)
+            contents = open_url(url_entry)
+            if(contents is not None):
+                svg_data.append(entry)
 
-                driver.close()
-            except (RuntimeError, TypeError, NameError):
-                print("Something went wrong when opening this url")
-                continue
         else:
             continue
-
-
-
-
-
             #THIS IS USEFUL. THIS IS HOW WE GET THE SVG AND SAVE IT LOCALLY
             #WE CAN LEVERAGE THE INDEX OF THE SHEET TO CONNECT THE POST TO THE DENSITY SCORE
 
