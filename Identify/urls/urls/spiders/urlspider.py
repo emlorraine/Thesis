@@ -26,11 +26,11 @@ def pull_reddit_data():
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("reddit_june")
+    sh = gc.open("filtered_data")
     for wk in sh:
         wh_data = wk.get_all_records()
         data.append(wh_data)
-    return data
+    return data[0]
 
 def determine_sample_size(raw_data_size):
     # confidence level of 95%
@@ -41,16 +41,16 @@ def determine_sample_size(raw_data_size):
     sample_size = (pow(1.96, 2) * std * (1-std))/(pow(margin_of_error,2))
     return round(sample_size)
 
-def get_data():
-    data = []
-    reddit_data = pull_reddit_data()
-    for sheet in reddit_data:
-        for entries in sheet:
-            data.append(entries)
+# def get_data():
+#     data = []
+#     reddit_data = pull_reddit_data()
+#     for sheet in reddit_data:
+#         for entries in sheet:
+#             data.append(entries)
 
-    sample_size = determine_sample_size(len(data))
-    random_sample_size = random.sample(data, sample_size)
-    return random_sample_size
+#     sample_size = determine_sample_size(len(data))
+#     random_sample_size = random.sample(data, sample_size)
+#     return random_sample_size
 
 def push_to_svg_sheet(df):
     data = pd.DataFrame(df)
@@ -68,8 +68,8 @@ def push_to_svg_sheet(df):
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("svg_data")
-    worksheet = sh.add_worksheet(title="june_data", rows="1700", cols="15")
+    sh = gc.open("filtered_data")
+    worksheet = sh.add_worksheet(title="analyzed_filter_data", rows="500", cols="15")
     set_with_dataframe(worksheet, data)
 
 svg_data = []
@@ -81,16 +81,17 @@ class Url(scrapy.Spider):
     def start_requests(self):
         http_user = 'user'
         http_pass = 'userpass'
-        data = get_data()
+        data = pull_reddit_data()
 
         for entry in data:
             url = entry['Post URL']
             request = SplashRequest(url=url, callback=self.parse, meta={'entry_item':entry}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
             yield request
     def parse(self, response):
-        custom_strainer = SoupStrainer(["svg","g"])
+        # classes: g_svelte
+        custom_strainer = SoupStrainer(["svg","g", {"class": "g_svelte"}])
         entry = response.meta.get('entry_item')
-        key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', 'graph', 'graphs']
+        key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
         if any(key in response.text for key in key_words):
             page_soup = BeautifulSoup(response.body, parse_only=custom_strainer)
             page_soup_str = (str(page_soup))[0:50000]
