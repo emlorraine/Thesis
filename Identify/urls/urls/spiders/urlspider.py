@@ -1,4 +1,5 @@
 from random import sample
+from matplotlib import image
 import scrapy 
 from scrapy_splash import SplashRequest
 from w3lib.http import basic_auth_header
@@ -10,6 +11,12 @@ from gspread_dataframe import get_as_dataframe, set_with_dataframe
 
 import pandas as pd
 import random
+
+import base64
+import matplotlib
+# from PIL import Image
+# from urllib.request import urlopen
+
 
 def pull_reddit_data():
     data = []
@@ -33,7 +40,7 @@ def pull_reddit_data():
     return data[0]
 
 def determine_sample_size(raw_data_size):
-    # confidence level of 95%
+    #  fidence level of 95%
     p = 0.05 
     z_score = 1.96	
     std = .5
@@ -74,6 +81,41 @@ def push_to_svg_sheet(df):
 
 svg_data = []
 
+script = """
+ -- Arguments:
+ -- * url - URL to render;
+ -- * css - CSS selector to render;
+ -- * pad - screenshot padding size.
+
+ -- this function adds padding around region
+ function pad(r, pad)
+ return {r[1]-pad, r[2]-pad, r[3]+pad, r[4]+pad}
+ end
+
+-- main script
+function main(splash)
+
+-- this function returns element bounding box
+local get_bbox = splash:jsfunc([[
+function(css) {
+  var el = document.querySelector(css);
+  var r = el.getBoundingClientRect();
+  return [r.left, r.top, r.right, r.bottom];
+}
+]])
+
+assert(splash:go(splash.args.url))
+assert(splash:wait(0.5))
+
+-- don't crop image by a viewport
+splash:set_viewport_full()
+
+local region = pad(get_bbox(splash.args.css), splash.args.pad)
+return splash:png{region=region}
+end
+"""
+
+
 # Terminal command: "scrapy crawl url"
 
 class Url(scrapy.Spider):
@@ -83,30 +125,50 @@ class Url(scrapy.Spider):
         http_pass = 'userpass'
         data = pull_reddit_data()
 
-        for entry in data:
-            url = entry['Post URL']
-            request = SplashRequest(url=url, callback=self.parse, meta={'entry_item':entry}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
-            yield request
+        splash_args = {
+            'lua_source': script,
+            'pad': 32,
+            'css': 'body'
+        }
+
+        # for entry in data:
+            # url = entry['Post URL']
+        url = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
+        # request = SplashRequest(url=url, args=splash_args, callback=self.parse, meta={'entry_item':entry}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+        request = SplashRequest(url=url, args=splash_args,endpoint='execute', callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+        yield request
+
+        
     def parse(self, response):
-        # classes: g_svelte
+        # "class": "g_svelte" is specifically for the NYTimes 
         custom_strainer = SoupStrainer(["svg","g", {"class": "g_svelte"}])
         entry = response.meta.get('entry_item')
         key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
-        if any(key in response.text for key in key_words):
-            page_soup = BeautifulSoup(response.body, parse_only=custom_strainer)
-            page_soup_str = (str(page_soup))[0:50000]
-            if(page_soup_str):
-                print("Successfully found at", response.url)
-                d = {"Raw":page_soup_str}
-                entry.update(d)
-                svg_data.append(entry)
-                yield {
-                    "url": response.url, 
-                }
+        # if any(key in response.text for key in key_words):
+            # page_soup = BeautifulSoup(response.body, parse_only=custom_strainer)
+            # page_soup_str = (str(page_soup))[0:50000]
+ 
+        # image_data = base64.b64decode(response.body)
 
-    def closed(self, reason):
-        print("FINISHED", svg_data)
-        push_to_svg_sheet(svg_data)
+        with open("image.png", "wb") as img:
+            img.write(response.body)
+
+        # filename = 'output/some_image.png'
+        # with open(filename, 'wb') as f:
+        #     f.write(image_data)
+
+            # if(page_soup_str):
+            #     print("Successfully found at", response.url)
+            #     d = {"Raw":page_soup_str}
+            #     entry.update(d)
+            #     svg_data.append(entry)
+            #     yield {
+            #         "url": response.url, 
+            #     }
+
+    # def closed(self, reason):
+    #     print("FINISHED", svg_data)
+    #     push_to_svg_sheet(svg_data)
 
 
 

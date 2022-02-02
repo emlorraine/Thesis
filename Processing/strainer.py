@@ -14,7 +14,7 @@ import pandas as pd
 
 def insepct_data():
     data = []
-    outlets = ["fivethirtyeight","nytimes", "cnn", "theguardian", "bbc", "newsweek", "vox", "washingtonpost", "fox", "washingtonexaminer"]
+    outlets = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
     credentials = {
         "type": "service_account",
         "project_id": "reddit-334418",
@@ -29,7 +29,7 @@ def insepct_data():
     } 
     gc = gspread.service_account_from_dict(credentials)
     # for sheet in sheets:
-    sh = gc.open("reddit_december")
+    sh = gc.open("reddit_march")
     for wk in sh:
         wh_data = wk.get_all_records()
         for record in wh_data:
