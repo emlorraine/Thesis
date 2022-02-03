@@ -33,20 +33,20 @@ def pull_reddit_data():
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("filtered_data")
+    sh = gc.open("reddit_march")
     for wk in sh:
         wh_data = wk.get_all_records()
         data.append(wh_data)
-    return data[0]
+    return
 
-def determine_sample_size(raw_data_size):
-    #  fidence level of 95%
-    p = 0.05 
-    z_score = 1.96	
-    std = .5
-    margin_of_error = .05
-    sample_size = (pow(1.96, 2) * std * (1-std))/(pow(margin_of_error,2))
-    return round(sample_size)
+# def determine_sample_size(raw_data_size):
+#     #  fidence level of 95%
+#     p = 0.05 
+#     z_score = 1.96	
+#     std = .5
+#     margin_of_error = .05
+#     sample_size = (pow(1.96, 2) * std * (1-std))/(pow(margin_of_error,2))
+#     return round(sample_size)
 
 # def get_data():
 #     data = []
@@ -131,40 +131,25 @@ class Url(scrapy.Spider):
             'css': 'body'
         }
 
-        # for entry in data:
-            # url = entry['Post URL']
-        url = "https://www.cnn.com/interactive/2019/business/us-minimum-wage-by-year/index.html"
+        for entry in data:
+            url = entry['Post URL']
+        # url = "https://www.theguardian.com/environment/ng-interactive/2021/jul/14/food-monopoly-meals-profits-data-investigation"
         # request = SplashRequest(url=url, args=splash_args, callback=self.parse, meta={'entry_item':entry}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
-        request = SplashRequest(url=url, args=splash_args,endpoint='execute', callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
-        yield request
+            request = SplashRequest(url=url, args=splash_args,endpoint='execute', meta={'entry_item':entry,'url':url}, callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+            yield request
 
         
     def parse(self, response):
         # "class": "g_svelte" is specifically for the NYTimes 
         custom_strainer = SoupStrainer(["svg","g", {"class": "g_svelte"}])
         entry = response.meta.get('entry_item')
+        url = response.meta.get('url')
         key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
-        # if any(key in response.text for key in key_words):
-            # page_soup = BeautifulSoup(response.body, parse_only=custom_strainer)
-            # page_soup_str = (str(page_soup))[0:50000]
- 
-        # image_data = base64.b64decode(response.body)
-
-        with open("image.png", "wb") as img:
-            img.write(response.body)
-
-        # filename = 'output/some_image.png'
-        # with open(filename, 'wb') as f:
-        #     f.write(image_data)
-
-            # if(page_soup_str):
-            #     print("Successfully found at", response.url)
-            #     d = {"Raw":page_soup_str}
-            #     entry.update(d)
-            #     svg_data.append(entry)
-            #     yield {
-            #         "url": response.url, 
-            #     }
+        filename = "./output/"+entry['ID'] + ".png"
+        if any(key in url for key in key_words):
+            if(response.body):
+                with open(filename, "wb") as img:
+                    img.write(response.body)
 
     # def closed(self, reason):
     #     print("FINISHED", svg_data)
