@@ -33,11 +33,11 @@ def pull_reddit_data():
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/reddit%40reddit-334418.iam.gserviceaccount.com"
     } 
     gc = gspread.service_account_from_dict(credentials)
-    sh = gc.open("reddit_march")
+    sh = gc.open("reddit_december")
     for wk in sh:
         wh_data = wk.get_all_records()
         data.append(wh_data)
-    return
+    return data
 
 # def determine_sample_size(raw_data_size):
 #     #  fidence level of 95%
@@ -76,7 +76,7 @@ def push_to_svg_sheet(df):
     } 
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("filtered_data")
-    worksheet = sh.add_worksheet(title="analyzed_filter_data", rows="500", cols="15")
+    worksheet = sh.add_worksheet(title="march_analyzed_filter_data", rows="500", cols="15")
     set_with_dataframe(worksheet, data)
 
 svg_data = []
@@ -130,13 +130,26 @@ class Url(scrapy.Spider):
             'pad': 32,
             'css': 'body'
         }
+        key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
+        month_data = pull_reddit_data()
+        for day in month_data:
+            for row in day:
+                url = row["Post URL"]
+                if any(key in url for key in key_words):
+                    request = SplashRequest(url=url, args=splash_args, callback=self.parse, meta={'entry_item':row}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+                    request = SplashRequest(url=url, args=splash_args,endpoint='execute', meta={'entry_item':row,'url':url}, callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+                    yield request
 
-        for entry in data:
-            url = entry['Post URL']
+
+        # for entry in data:
+        #     url = entry['Post URL']
+        #     print(url)
+        #     print("---------------------------------------------------------------")
+         
         # url = "https://www.theguardian.com/environment/ng-interactive/2021/jul/14/food-monopoly-meals-profits-data-investigation"
         # request = SplashRequest(url=url, args=splash_args, callback=self.parse, meta={'entry_item':entry}, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
-            request = SplashRequest(url=url, args=splash_args,endpoint='execute', meta={'entry_item':entry,'url':url}, callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
-            yield request
+            # request = SplashRequest(url=url, args=splash_args,endpoint='execute', meta={'entry_item':entry,'url':url}, callback=self.parse, headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.7'},  splash_headers={'Authorization': basic_auth_header('user', 'userpass')})
+            # yield request
 
         
     def parse(self, response):
@@ -144,12 +157,12 @@ class Url(scrapy.Spider):
         custom_strainer = SoupStrainer(["svg","g", {"class": "g_svelte"}])
         entry = response.meta.get('entry_item')
         url = response.meta.get('url')
-        key_words = ['chart', 'charts', 'interactive', 'interatives', 'viz', 'visualization','visualizations', ' graph ', 'graphs']
         filename = "./output/"+entry['ID'] + ".png"
-        if any(key in url for key in key_words):
-            if(response.body):
-                with open(filename, "wb") as img:
-                    img.write(response.body)
+        # if any(key in url for key in key_words):
+        if(response.body):
+            with open(filename, "wb") as img:
+                img.write(response.body)
+                print("Successfully screenshotted", response.body)
 
     # def closed(self, reason):
     #     print("FINISHED", svg_data)
