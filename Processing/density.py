@@ -11,12 +11,13 @@ from skimage import io
 
 
 import gspread
-from gspread_dataframe import get_as_dataframe, set_with_dataframe
+from gspread_dataframe import set_with_dataframe
 
 import os 
 import pandas as pd
 
 posts_dict = {"Date": [], "Page": [], "Title": [], "Post Text": [], "ID": [], "Total Comments": [], "Likes": [],  "Post URL": [], "Entropy":[]}
+
 # conduct search on entry id
 def pull_reddit_data():
     data = []
@@ -38,9 +39,8 @@ def pull_reddit_data():
         wh_data = wk.get_all_records()
         data.append(wh_data)
     return data
-
+data = pull_reddit_data()
 def find_index(supplied_index):
-    data = pull_reddit_data()
     for row in data[0]:
         if(supplied_index == (row['ID'])):
             print("Successfully found:",supplied_index)
@@ -52,22 +52,6 @@ def calc_entropy(filepath):
         return (shannon_entropy(img[:,:,0]))
     except:
         print("An exception occurred")
-
-data = []
-
-path = 'output/'
-files = os.listdir(path)
-for file in files:
-    if os.path.isfile(os.path.join(path, file)):
-        f = open(os.path.join(path, file),'r')
-        index = str(file[0:6])
-        ent = calc_entropy(f)
-        df = find_index(index)
-        if(df and ent):
-            df['Entropy']=ent
-            print(df)
-       
-
 
 def push_to_svg_sheet(df):
     data = pd.DataFrame(df)
@@ -85,6 +69,25 @@ def push_to_svg_sheet(df):
     } 
     gc = gspread.service_account_from_dict(credentials)
     sh = gc.open("filtered_data")
-    worksheet = sh.add_worksheet(title="march_analyzed_filter_data", rows="500", cols="15")
+    worksheet = sh.add_worksheet(title="analyzed_reddit", rows="500", cols="15")
     set_with_dataframe(worksheet, data)
+
+
+final_data = []
+path = 'output/'
+files = os.listdir(path)
+for file in files:
+    if os.path.isfile(os.path.join(path, file)):
+        f = open(os.path.join(path, file),'r')
+        index = str(file[0:6])
+        ent = calc_entropy(f)
+        df = find_index(index)
+        if(df and ent):
+            df['Entropy']=ent
+            final_data.append(df)
+
+push_to_svg_sheet(final_data)
+       
+
+
 
