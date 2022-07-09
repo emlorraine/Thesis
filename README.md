@@ -1,5 +1,7 @@
 # Thesis
 
+Accepted thesis can be downloaded via WUSTL Open Scholarship at [here](https://openscholarship.wustl.edu/eng_etds/707/). 
+
 ## Repo Structure:
 
 - `📂all_data`: CSVs of all data scraped by month
