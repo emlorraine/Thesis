@@ -3,6 +3,7 @@
 ## Repo Structure:
 
 - `📂all_data`: CSVs of all data scraped by month
+- `📜viz_data.csv`: CSV of visualizations scraped with complexity anaylsis
 - `📂imgs`: PNGs of visualizations scraped sorted by type
 - `📂process_viz/access.py`: Helper to read/write to Google Sheets
 - `📂process_viz/strainer.py`: Helper to filter and export records in  sheet
@@ -11,6 +12,7 @@
 ```
 📦src
  ┣ 📂all_data
+ ┣ 📜viz_data.csv
  ┣ 📂imgs
  ┃ ┣ 📂area
  ┃ ┣ 📂bar
