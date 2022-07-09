@@ -8,6 +8,7 @@
 - `📂process_viz/strainer.py`: Helper to filter and export records in  sheet
 - `📂process_viz/urls/spiders/urlspider`: Engine to scrape Reddit and then load/inspect/scrape each url
 
+```
 📦src
  ┣ 📂all_data
  ┣ 📂imgs
@@ -44,6 +45,8 @@
  ┃ ┃ ┃ ┗ 📜settings.py
  ┃ ┃ ┗ 📜scrapy.cfg
  ┃ ┗ 📜chromedriver
+ 
+ ```
 
 ## Data Sources: 
 
