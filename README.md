@@ -1,6 +1,6 @@
 # Thesis
 
-Accepted thesis can be downloaded via WUSTL Open Scholarship at [here](https://openscholarship.wustl.edu/eng_etds/707/). 
+Accepted thesis can be downloaded via WUSTL Open Scholarship [here](https://openscholarship.wustl.edu/eng_etds/707/). 
 
 ## Repo Structure:
 
