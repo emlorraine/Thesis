@@ -8,6 +8,7 @@
 - `📂process_viz/strainer.py`: Helper to filter and export records in  sheet
 - `📂process_viz/urls/spiders/urlspider`: Engine to scrape Reddit and then load/inspect/scrape each url
 
+```
 📦src
  ┣ 📂all_data
  ┣ 📂imgs
@@ -44,6 +45,8 @@
  ┃ ┃ ┃ ┗ 📜settings.py
  ┃ ┃ ┗ 📜scrapy.cfg
  ┃ ┗ 📜chromedriver
+ 
+ ```
 
 ## Data Sources: 
 
@@ -68,7 +71,7 @@ All data in this corpus was collected on Reddit from March 2, 2021 through Decem
 
 
 ## Data Collection Methods: 
-Data was scraped with PushShift API. Web crawling was performed using Scrapy-Splash with a  Docker integration. All posts in the data set were initially scraped for keywords that would initiate the presence of a visualization: [`chart`, `charts`, `interactive', `interactives`, `viz`, `visualization`, `visualizations`, `graph`, `graphs`]. We examined both the DOM of the Reddit webpages in addition to the body text and title scraped from the post. 
+Data was scraped with PushShift API. Web crawling was performed using Scrapy-Splash with a  Docker integration. All posts in the data set were initially scraped for keywords that would initiate the presence of a visualization: [`chart`, `charts`, `interactive`, `interactives`, `viz`, `visualization`, `visualizations`, `graph`, `graphs`]. We examined both the DOM of the Reddit webpages in addition to the body text and title scraped from the post. 
 
 To get images of the visualizations, we used the screenshot feature of Scrapy-Splash and did a manual check to ensure that the image contained a visualization.
 
